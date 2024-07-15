@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://apicms.thestar.com.my/uploads/images/2023/04/06/2012211.webp') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #ff4081;
+            margin-bottom: 20px;
+        }
+        input[type="file"], input[type="text"], button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="file"] {
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #ff4081;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #ff607f;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 400px) {
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Generate Image</h2>
+        <input type="file" id="image-input" accept="image/*">
+        <input type="text" id="prompt-input" placeholder="Enter prompt">
+        <button onclick="generateImage()">Generate</button>
+        <img id="generated-image" style="display: none;">
+    </div>
+    <script>
+        function generateImage() {
+            const imageInput = document.getElementById('image-input').files[0];
+            const promptInput = document.getElementById('prompt-input').value;
+            const generatedImage = document.getElementById('generated-image');
+
+            if (!imageInput || !promptInput) {
+                alert("Please provide both image and prompt.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', imageInput);
+            formData.append('prompt', promptInput);
+
+            fetch('/generate_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                generatedImage.src = data:image/jpeg;base64,${data.image};
+                generatedImage.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
