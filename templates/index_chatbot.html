@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoChat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://png.pngtree.com/thumb_back/fw800/background/20240102/pngtree-vibrant-abstract-texture-in-shades-of-purple-and-pink-image_13848982.png') no-repeat center center fixed;
+            background-size: cover;            
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            max-height: 700px;
+            background: url('https://static.india.com/wp-content/uploads/2023/10/DSC_0042-Edit.jpg?impolicy=Medium_Widthonly&w=400') no-repeat center center;
+            background-size: cover;
+            border-radius: 20px;
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(5px); /* To ensure readability of text */
+        }
+    
+        .chat-header {
+            background-color: rgba(255, 133, 161, 0.9); /* Slightly transparent */
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scrollbar-width: none;
+        }
+    
+        .chat-message {
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 75%;
+            animation: fadeIn 0.5s ease;
+        }
+    
+        .user-message {
+            background-color: rgba(255, 133, 161, 0.9); /* Slightly transparent */
+            color: #fff;
+            align-self: flex-end;
+        }
+    
+        .bot-message {
+            background-color: rgba(255, 238, 243, 0.9); /* Slightly transparent */
+            align-self: flex-start;
+        }
+    
+        .bot-message img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    
+        .input-container {
+            display: flex;
+            padding: 10px 20px;
+            border-top: 1px solid #ddd;
+            background-color: rgba(242, 242, 242, 0.9); /* Slightly transparent */
+        }
+    
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            margin-right: 10px;
+        }
+    
+        .input-container button {
+            padding: 10px 20px;
+            background-color: rgba(255, 64, 129, 0.9); /* Slightly transparent */
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    
+        .input-container button:hover {
+            background-color: rgba(255, 96, 129, 0.9); /* Slightly transparent */
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>FashionBOT</h2>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message bot-message">Hello! How can I assist you today?</div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+            <button id="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <audio id="audio-player" style="display: none;"></audio>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === '') return;
+    
+            const chatBox = document.getElementById('chat-box');
+            const userMessage = document.createElement('div');
+            userMessage.textContent = userInput;
+            userMessage.classList.add('chat-message', 'user-message');
+            chatBox.appendChild(userMessage);
+    
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('chat-message', 'bot-message');
+                
+                if (data.response.includes('ImageURL:')) {
+                    const parts = data.response.split('ImageURL:');
+                    const text = parts[0].trim();
+                    const imageUrl = parts[1].trim();
+    
+                    // Display text message
+                    const textElement = document.createElement('div');
+                    textElement.textContent = text;
+                    botMessage.appendChild(textElement);
+    
+                    // Display image
+                    const imageElement = document.createElement('img');
+                    imageElement.src = imageUrl;
+                    imageElement.alt = 'Product Image';
+                    imageElement.classList.add('bot-message-img');
+                    botMessage.appendChild(imageElement);
+                } else {
+                    // No image case, display only text
+                    botMessage.textContent = data.response;
+                }
+                
+                chatBox.appendChild(botMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                // Play sound after rendering
+                setTimeout(() => {
+                    playSound();
+                }, 100);
+            });
+            document.getElementById('user-input').value = '';
+        }
+    
+        function playSound() {
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.src = 'static/response.mp3'; // Adjust the path to your sound file
+            audioPlayer.play();
+        }
+    
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
