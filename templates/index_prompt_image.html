@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://as1.ftcdn.net/v2/jpg/01/91/89/12/1000_F_191891230_LRAZDEd8EZuG1SPmLMWGZfgVTRMP2zyD.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            color: #ff7043;
+        }
+        input[type="file"], input[type="text"], button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="file"], input[type="text"] {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #ff7043;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff8a50;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        @media (max-width: 400px) {
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Generate Image</h2>
+        <input type="file" id="image-input" accept="image/*">
+        <input type="text" id="prompt-input" placeholder="Enter prompt">
+        <button onclick="generateImage()">Generate</button>
+        <img id="generated-image" style="display: none;">
+    </div>
+    <script>
+        function generateImage() {
+            const imageInput = document.getElementById('image-input').files[0];
+            const promptInput = document.getElementById('prompt-input').value;
+            const generatedImage = document.getElementById('generated-image');
+
+            if (!imageInput || !promptInput) {
+                alert("Please provide both image and prompt.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', imageInput);
+            formData.append('prompt', promptInput);
+
+            fetch('/generate_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                generatedImage.src = data:image/jpeg;base64,${data.image};
+                generatedImage.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
