@@ -38,13 +38,11 @@ def fetch_trends_data(keyword, timeframe='today 5-y'):
         time.sleep(10)
         return fetch_trends_data(keyword, timeframe)
 
-# Prepare the data for NeuralProphet
 def prepare_data_for_forecast(trends_data, keyword):
     data = trends_data[['date', keyword]].dropna()
     data.columns = ['ds', 'y']
     return data
 
-# Forecast function
 def forecast_trend(data, periods=1825):  # 5 years = 1825 days
     model = NeuralProphet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
     model.fit(data, freq='D')
@@ -82,7 +80,7 @@ def scrape_images(keyword, num_images=5):
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
-    img_tags = soup.find_all('img', limit=num_images + 1)  # +1 to account for the first image which is usually the Google logo
+    img_tags = soup.find_all('img', limit=num_images + 1)  
 
     img_urls = []
     for img_tag in img_tags[1:]:  # Skip the first image
